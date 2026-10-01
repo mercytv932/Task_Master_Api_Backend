@@ -16,3 +16,18 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "Failed to create project", error });
   }
 });
+
+router.get("/", async (req, res) => {
+  try {
+    const getAllProjects = await Project.find({
+      user: req.user._id,
+    });
+    if (getAllProjects) {
+      res.status(201).json(getAllProjects);
+    } else {
+      return res.status(400).json("You don't have projects");
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to return all projects" });
+  }
+});
