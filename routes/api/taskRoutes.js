@@ -42,12 +42,13 @@ router.get("/:projectId/tasks", async (req, res) => {
 router.put("/:taskId", async (req, res) => {
   try {
     const { taskId } = req.params;
-    const project = await Project.findById(Task.project);
-    if (project.user.equals(req.user.id)) {
+    const task = await Task.findById(taskId);
+    const project = await Project.findById(task.project);
+    if (project.user.equals(req.user._id)) {
       const updateTask = await Task.findByIdAndUpdate(taskId, req.body, {
         new: true,
       });
-      return res.status(201).json(updateTask);
+      return res.status(200).json(updateTask);
     }
   } catch (error) {
     res.status(500).json({ message: "Failed to update task" });
@@ -55,4 +56,19 @@ router.put("/:taskId", async (req, res) => {
 });
 
 //delete a task
-router.delete("/:taskId", async (req, res) => {});
+router.delete("/:taskId", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const task = await Task.findById(taskId);
+    const project = await Project.findById(task.project);
+    if (project.user.equals(req.user._id)) {
+      const deleteTask = await Task.findByIdAndDelete(taskId);
+      res
+        .status(200)
+        .json({ message: "Task successfully deleted", task: deleteTask });
+    }
+    return res.status(403).json({ message: "You don't own this project" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete task" });
+  }
+});
