@@ -7,7 +7,22 @@ const authMiddleware = require("../../utils/auth.js");
 router.use(authMiddleware);
 
 //create new task for a specific project
-router.post("/:projectId/tasks", async (req, res) => {});
+router.post("/:projectId/tasks", async (req, res) => {
+  try {
+    const { projectId } = req.params; //Take projectID from url and put in {projectId} variable.
+    const project = await Project.findById(projectId);
+    if (project.user.equals(req.user._id)) {
+      const newTask = await Task.create({
+        ...req.body,//takes the info
+        project: projectId,
+      });
+      res.status(201).json(newTask);
+    }
+    return res.status(403).json({ message: "You don't own this project" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create new task", error });
+  }
+});
 
 //get all tasks for a specific project
 router.get("/:projectId/tasks", async (req, res) => {});
