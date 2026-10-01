@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const User = require("../../models/User.js");
 const jwt = require("jsonwebtoken");
+const authMiddleware = require("../../utils//auth.js");
+
+router.use(authMiddleware);
 
 function signToken(user) {
   return jwt.sign(
