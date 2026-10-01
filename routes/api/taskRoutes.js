@@ -13,7 +13,7 @@ router.post("/:projectId/tasks", async (req, res) => {
     const project = await Project.findById(projectId);
     if (project.user.equals(req.user._id)) {
       const newTask = await Task.create({
-        ...req.body,//takes the info
+        ...req.body, //takes the info
         project: projectId,
       });
       res.status(201).json(newTask);
@@ -25,7 +25,18 @@ router.post("/:projectId/tasks", async (req, res) => {
 });
 
 //get all tasks for a specific project
-router.get("/:projectId/tasks", async (req, res) => {});
+router.get("/:projectId/tasks", async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+    if (project && project.user.equals(req.user._id)) {
+      const getTasks = await Tasks.find({ project: projectId });
+      return res.status(201).json(getTasks);
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get all project's tasks" });
+  }
+});
 
 //update a task
 router.put("/:taskId", async (req, res) => {});
