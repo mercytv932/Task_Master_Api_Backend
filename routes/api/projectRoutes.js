@@ -61,3 +61,16 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ message: "Failed to update project" });
   }
 });
+
+//delete a project
+router.delete("/:id", async (req, res) => {
+  try {
+    const project = await Project.findByIdAndDelete(req.user._id);
+    if (!project) {
+      res.status(404).json({ message: "Project not found" });
+    }
+    return res.status(201).json({ message: "Project successfully deleted 🎉" });
+  } catch (error) {
+    res;
+  }
+});
