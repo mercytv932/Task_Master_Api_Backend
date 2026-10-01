@@ -26,9 +26,8 @@ router.get("/", async (req, res) => {
     });
     if (getAllProjects) {
       res.status(201).json(getAllProjects);
-    } else {
-      return res.status(400).json("You don't have projects");
     }
+    return res.status(400).json("You don't have projects");
   } catch (error) {
     res.status(500).json({ message: "Failed to return all projects" });
   }
@@ -38,12 +37,27 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const getProjectById = await Project.findById(req.params.id);
+    const getProjectById = await Project.findById(req.user._id);
     if (!getProjectById) {
       res.status(403).json({ message: "Can't get project" });
     }
     return res.status(201).json(getProjectById);
   } catch (error) {
     res.status(500).json({ message: "Failed to get project", error });
+  }
+});
+
+//update  a project
+router.put("/:id", async (req, res) => {
+  try {
+    const project = await Project.findByIdAndUpdate(req.user._id, req.body, {
+      new: true,
+    });
+    if (!project) {
+      res.status(404).json({ message: "Book not find" });
+    }
+    return res.status(201).json(project);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update project" });
   }
 });
