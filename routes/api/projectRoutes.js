@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
       ...req.body,
       user: req.user._id,
     });
-    res.status(201).json(newProject);
+    return res.status(201).json(newProject);
   } catch (error) {
     res.status(500).json({ message: "Failed to create project", error });
   }
@@ -24,10 +24,7 @@ router.get("/", async (req, res) => {
     const getAllProjects = await Project.find({
       user: req.user._id,
     });
-    if (getAllProjects) {
-      res.status(201).json(getAllProjects);
-    }
-    return res.status(400).json("You don't have projects");
+    return res.status(200).json(getAllProjects);
   } catch (error) {
     res.status(500).json({ message: "Failed to return all projects" });
   }
@@ -37,11 +34,12 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const getProjectById = await Project.findById(req.user._id);
-    if (!getProjectById) {
-      res.status(403).json({ message: "Can't get project" });
+    const { id } = req.params;
+    const getProjectById = await Project.findById(id);
+    if (getProjectById && getProjectById.user.equals(req.user._id)) {
+      res.status(200).json(getProjectById);
     }
-    return res.status(201).json(getProjectById);
+    return res.status(403).json({ message: "Couldn't get the project" });
   } catch (error) {
     res.status(500).json({ message: "Failed to get project", error });
   }
@@ -50,13 +48,14 @@ router.get("/:id", async (req, res) => {
 //update  a project
 router.put("/:id", async (req, res) => {
   try {
-    const project = await Project.findByIdAndUpdate(req.user._id, req.body, {
-      new: true,
-    });
-    if (!project) {
-      res.status(404).json({ message: "Book not find" });
+    const { id } = req.params;
+    const project = await Project.findById(id);
+    if (project && project.user.equals(req.user._id)) {
+      const updatedProject = await Project.findByIdAndUpdate(id, req.body, {
+        new: true,
+      });
+      res.status(200).json(updatedProject);
     }
-    return res.status(201).json(project);
   } catch (error) {
     res.status(500).json({ message: "Failed to update project" });
   }
@@ -65,12 +64,18 @@ router.put("/:id", async (req, res) => {
 //delete a project
 router.delete("/:id", async (req, res) => {
   try {
-    const project = await Project.findByIdAndDelete(req.user._id);
-    if (!project) {
-      res.status(404).json({ message: "Project not found" });
+    const { id } = req.params;
+    const project = await Project.findById(id);
+    if (project && project.user.equals(req.user._id)) {
+      await Project.findByIdAndDelete(id);
+
+      return res
+        .status(200)
+        .json({ message: "Project successfully deleted 🎉" });
     }
-    return res.status(201).json({ message: "Project successfully deleted 🎉" });
   } catch (error) {
-    res;
+    res.status(500).json({ message: "Failed to delete Project" });
   }
 });
+
+module.exports = router;

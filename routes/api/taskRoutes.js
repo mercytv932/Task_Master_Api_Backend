@@ -11,12 +11,12 @@ router.post("/:projectId/tasks", async (req, res) => {
   try {
     const { projectId } = req.params; //Take projectID from url and put in {projectId} variable.
     const project = await Project.findById(projectId);
-    if (project.user.equals(req.user._id)) {
+    if (project && project.user.equals(req.user._id)) {
       const newTask = await Task.create({
         ...req.body, //takes the info
         project: projectId,
       });
-      res.status(201).json(newTask);
+      res.status(200).json(newTask);
     }
     return res.status(403).json({ message: "You don't own this project" });
   } catch (error) {
@@ -30,9 +30,10 @@ router.get("/:projectId/tasks", async (req, res) => {
     const { projectId } = req.params;
     const project = await Project.findById(projectId);
     if (project && project.user.equals(req.user._id)) {
-      const getTasks = await Tasks.find({ project: projectId });
-      return res.status(201).json(getTasks);
+      const getTasks = await Task.find({ project: projectId });
+      res.status(200).json(getTasks);
     }
+    return res.status(403).json({ message: "You don't own this project" });
   } catch (error) {
     res.status(500).json({ message: "Failed to get all project's tasks" });
   }
@@ -48,8 +49,10 @@ router.put("/:taskId", async (req, res) => {
       const updateTask = await Task.findByIdAndUpdate(taskId, req.body, {
         new: true,
       });
-      return res.status(200).json(updateTask);
+      res.status(200).json(updateTask);
     }
+
+    return res.status(403).json({ message: "You don't own this project" });
   } catch (error) {
     res.status(500).json({ message: "Failed to update task" });
   }
@@ -72,3 +75,5 @@ router.delete("/:taskId", async (req, res) => {
     res.status(500).json({ message: "Failed to delete task" });
   }
 });
+
+module.exports = router;
