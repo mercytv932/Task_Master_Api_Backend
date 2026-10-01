@@ -39,7 +39,20 @@ router.get("/:projectId/tasks", async (req, res) => {
 });
 
 //update a task
-router.put("/:taskId", async (req, res) => {});
+router.put("/:taskId", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const project = await Project.findById(Task.project);
+    if (project.user.equals(req.user.id)) {
+      const updateTask = await Task.findByIdAndUpdate(taskId, req.body, {
+        new: true,
+      });
+      return res.status(201).json(updateTask);
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update task" });
+  }
+});
 
 //delete a task
 router.delete("/:taskId", async (req, res) => {});
