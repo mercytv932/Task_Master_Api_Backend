@@ -10,7 +10,7 @@ router.use(authMiddleware);
 router.post("/:projectId/tasks", async (req, res) => {
   try {
     const { projectId } = req.params; //Take projectID from url and put in {projectId} variable.
-    const project = await Project.findById(projectId);
+    const project = await Project.findById(projectId); //Search for Id that matches the Id from url
     if (project && project.user.equals(req.user._id)) {
       const newTask = await Task.create({
         ...req.body, //takes the info
